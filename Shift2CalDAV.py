@@ -19,6 +19,7 @@ from ics import Calendar, Event
 config = configparser.ConfigParser()
 config.read("credentials.cfg")
 davurl = config['url']['address-test']
+print(davurl)
 
 #example vcal
 #vcal = """BEGIN:VCALENDAR
@@ -40,11 +41,12 @@ calendars = principal.calendars()
 ics = Calendar()
 event = Event()
 event.name = "a test event"
+#time zone info in RFC 5545, fix this later
+#https://icalendar.org/iCalendar-RFC-5545/3-2-19-time-zone-identifier.html
 event.begin = '2020-02-28 12:30:00'
 ics.events.add(event)
-ics.events
-print(ics)
+#print(ics)
 
 #we are currently providing the exact calendar to use in our URL
 calendar = calendars[0]
-#calendar.add_event(someical)
+calendar.add_event(str(ics))
