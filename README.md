@@ -5,6 +5,7 @@ Takes shifts from eHR at Target and pushes them to a webdav calendar.  It was ma
  - Python 3.x
  - A DAV-enabled calendar with write access
  - Firefox
+ - [Geckodriver](https://github.com/mozilla/geckodriver/releases) in your PATH 
 
 ## Usage
 First, copy sample.cfg to credentials.cfg 
