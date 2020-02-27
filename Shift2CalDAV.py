@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-#pip install selenium
-#pip install httplib2
-#pip install caldav
-#pip install ics
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -13,31 +8,15 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import datetime
 from datetime import datetime, date, timedelta
-from httplib2 import Http
 import caldav
 from caldav.elements import dav, cdav
 import configparser
 from ics import Calendar, Event
+from dateutil import tz
 
-#temporary holder for config options, move to file later
 config = configparser.ConfigParser()
 config.read("credentials.cfg")
-davurl = config['url']['address-test']
-
-#example vcal
-#vcal = """BEGIN:VCALENDAR
-#VERSION:2.0
-#PRODID:-//Example Corp.//CalDAV Client//EN
-#BEGIN:VEVENT
-#UID:1234567890
-#DTSTAMP:20100510T182145Z
-#DTSTART:20100512T170000Z
-#DTEND:20100512T180000Z
-#SUMMARY:This is an event
-#END:VEVENT
-#END:VCALENDAR
-#"""
-
+davurl = config['url']['address']
 #acquire calendar info
 client = caldav.DAVClient(davurl)
 principal = client.principal()
@@ -45,16 +24,28 @@ calendars = principal.calendars()
 #we are currently providing the exact calendar to use in our URL
 calendar = calendars[0]
 
-#add an event example
-#ics is our ical event - in vcal format
-#ics = Calendar()
-#event = Event()
-#event.name = "a test event"
-#time zone info in RFC 5545, fix this later
-#https://icalendar.org/iCalendar-RFC-5545/3-2-19-time-zone-identifier.html
-#event.begin = '2020-02-28 12:30:00'
-#ics.events.add(event)
-#calendar.add_event(str(ics))
+class Shift:
+
+    def __init__(self, day, date, position, start_time, end_time):
+        self.day = day
+        self.date = date
+        self.position = position
+        self.startTime = datetime.strptime(start_time, "%I:%M%p").strftime("%H:%M:%S")
+        self.endTime = datetime.strptime(end_time, "%I:%M%p").strftime("%H:%M:%S")
+
+    def make_event(self):
+
+        ics=Calendar()
+        event = Event()
+
+        event.name = "work - " + self.position
+        event.begin = self.date + " " + self.startTime
+        event.end = self.date + " " + self.endTime
+        ics.events.add(event)
+        #we need to get rid of the Z in the times because it implies we're using UTC
+        #we are just using 'local' time, no time zone and ics only supports UTC
+        calendar.add_event(str(ics).replace("Z",""))
+        #print(event)
 
 
 ##############################
@@ -63,24 +54,22 @@ calendar = calendars[0]
 
 browser = webdriver.Firefox()
 browser.get('http://wss.target.com/selfservice')
+waittime=20
 time.sleep(2)
-#sign in manually, be faster than 30 seconds.
-#there is some sort of bizarre trickery to detect auto logins it seems
-#the login page is dynamically generated now, the fields are not predictable
-#once logged in though, eHR is still working okay with chromedriver
+
 username = browser.find_element_by_id("loginID")
 password = browser.find_element_by_id("pass")
 username.send_keys(config['secrets']['employeeID'])
 username.send_keys(Keys.TAB)
 password.send_keys(config['secrets']['password'])  
 password.send_keys(Keys.RETURN)
-time.sleep(10)
+time.sleep(waittime)
 #choose to answer security questions
 qna = browser.find_element_by_id('sec_qna')
 qna.click()
 login_attempt = browser.find_element_by_xpath("//*[@type='submit']")
 login_attempt.submit()
-time.sleep(5)
+time.sleep(waittime)
 answer = browser.find_element_by_id("answer0")
 #sort of hacky, but there are 3 possible security questions and we choose a "keyword"
 #out of each of the three, so like "what is your favorite restaurant?" we'd use restaurant
@@ -99,7 +88,7 @@ else:
 
 submit = browser.find_element_by_id("submit-button")
 submit.click()
-time.sleep(5)
+time.sleep(waittime)
 table = browser.find_element_by_class_name("request_table_bordered")
 
 for x in range(2, 9):
@@ -111,7 +100,13 @@ for x in range(2, 9):
     if not shift.text.strip():
         continue
     shift_info = (days.text + '\n' + shift.text)
-    print(shift_info)
+    #print(shift_info)
+    workday = Shift(shift_info.splitlines()[0],
+                    datetime.strptime(shift_info.splitlines()[1], "%m/%d/%y").strftime("%Y-%m-%d"),
+                    shift_info.splitlines()[2],
+                    shift_info.splitlines()[3].split('-')[0].strip(),
+                    shift_info.splitlines()[3].split('-')[1].strip())
+    workday.make_event()
 
 #move to the next page
 next = browser.find_element_by_xpath("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[2]/tbody/tr[1]/td/div/a[2]")
@@ -126,4 +121,12 @@ for x in range(2, 9):
     if not shift.text.strip():
         continue
     shift_info = (days.text + '\n' + shift.text)
-    print(shift_info)
+    #print(shift_info)
+    workday = Shift(shift_info.splitlines()[0],
+                    datetime.strptime(shift_info.splitlines()[1], "%m/%d/%y").strftime("%Y-%m-%d"),
+                    shift_info.splitlines()[2],
+                    shift_info.splitlines()[3].split('-')[0].strip(),
+                    shift_info.splitlines()[3].split('-')[1].strip())
+    workday.make_event()
+
+browser.quit()
