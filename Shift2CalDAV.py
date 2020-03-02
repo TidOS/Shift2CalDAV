@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import PySimpleGUI as sg
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -14,7 +14,7 @@ import configparser
 from ics import Calendar, Event
 from dateutil import tz
 
-
+#sg.Popup('Hello From PySimpleGUI!', 'This is the shortest GUI program ever!')
 config = configparser.ConfigParser()
 config.read("credentials.cfg")
 davurl = config['url']['address']

@@ -352,3 +352,5 @@ MigrationBackup/
 credentials.cfg
 /chromedriver.exe
 /geckodriver.exe
+/Output
+/test.iss
