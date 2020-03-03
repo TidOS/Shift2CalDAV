@@ -40,6 +40,17 @@ class Shift:
         ics=Calendar()
         event = Event()
 
+        #check for existing work shift
+        #if there is one, delete it and replace with the new one
+        #because it's possible the shift has changed
+        split = self.date.split('-')
+        todayshift = calendar.date_search(datetime(int(split[0]), int(split[1]), int(split[2])), datetime(int(split[0]), int(split[1]), int(split[2])+1))
+        for e in todayshift:
+            e.load()
+            if "work" in str(e.instance.vevent):
+                #print("deleting existing shift")
+                e.delete()
+
         event.name = "work - " + self.position
         event.begin = self.date + " " + self.startTime
         event.end = self.date + " " + self.endTime
