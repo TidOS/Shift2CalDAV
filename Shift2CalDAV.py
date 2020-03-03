@@ -47,7 +47,7 @@ class Shift:
         todayshift = calendar.date_search(datetime(int(split[0]), int(split[1]), int(split[2])), datetime(int(split[0]), int(split[1]), int(split[2])+1))
         for e in todayshift:
             e.load()
-            if "work" in str(e.instance.vevent):
+            if "<SUMMARY{}work" in str(e.instance.vevent):
                 #print("deleting existing shift")
                 e.delete()
 
