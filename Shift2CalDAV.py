@@ -44,13 +44,18 @@ class Shift:
         #if there is one, delete it and replace with the new one
         #because it's possible the shift has changed
         split = self.date.split('-')
-        todayshift = calendar.date_search(datetime(int(split[0]), int(split[1]), int(split[2])), datetime(int(split[0]), int(split[1]), int(split[2])+1))
+        #print("looking in calendar for date: " + self.date)
+
+        try:
+            todayshift = calendar.date_search(datetime(int(split[0]), int(split[1]), int(split[2])), datetime(int(split[0]), int(split[1]), int(split[2])+1))
+        except ValueError:
+            print("it's next month for next day.")
+            todayshift = calendar.date_search(datetime(int(split[0]), int(split[1]), int(split[2])), datetime(int(split[0]), int(split[1])+1, 1))
         for e in todayshift:
             e.load()
             if "<SUMMARY{}work" in str(e.instance.vevent):
                 #print("deleting existing shift")
                 e.delete()
-
         event.name = "work - " + self.position
         event.begin = self.date + " " + self.startTime
         event.end = self.date + " " + self.endTime
