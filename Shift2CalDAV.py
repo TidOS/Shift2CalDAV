@@ -77,11 +77,11 @@ class Shift:
 
 if config['options']['headless'] == "yes":
     print("headless mode enabled")
-    options = webdriver.FirefoxOptions()
+    options = webdriver.ChromeOptions()
     options.add_argument('-headless')
-    browser = webdriver.Firefox(options=options)
+    browser = webdriver.Chrome(options=options)
 else:
-    browser = webdriver.Firefox()
+    browser = webdriver.Chrome()
 
 browser.get('http://wss.target.com/selfservice')
 timeout = 20
@@ -95,11 +95,15 @@ time.sleep(1)
 print("entering username and password...")
 username = browser.find_element_by_id("loginID")
 password = browser.find_element_by_id("pass")
+username.click()
 username.send_keys(config['secrets']['employeeID'])
 username.send_keys(Keys.TAB)
-password.send_keys(config['secrets']['password'])  
-password.send_keys(Keys.RETURN)
-
+username.click()
+password.send_keys(config['secrets']['password'])
+password.click()
+#password.send_keys(Keys.RETURN)
+loginbutton = browser.find_element_by_name("Login")
+loginbutton.submit()
 try:
     element_present = EC.presence_of_element_located((By.ID, 'sec_qna'))
     WebDriverWait(browser, timeout).until(element_present)
