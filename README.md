@@ -27,6 +27,7 @@ Next, run
  - According to [this](https://stackoverflow.com/questions/33225947/can-a-website-detect-when-you-are-using-selenium-with-chromedriver_) StackOverflow post, there are some javascript variables sites use to detect web drivers like chromedriver
  - So, we need to run 
      perl -pi -e 's/cdc_/dog_/g' /path/to/chromedriver
+
     - This just renames some variables so that the site doesn't know we're using a web driver.
     - This repository contains a "patched" chromedriver for macOS
 
