@@ -4,8 +4,8 @@ Takes shifts from eHR at Target and pushes them to a webdav calendar.  It was ma
 
  - Python 3.x
  - A DAV-enabled calendar with write access
- - Firefox
- - [Geckodriver](https://github.com/mozilla/geckodriver/releases) in your PATH 
+ - Chrome
+ - [Chromedriver](https://chromedriver.chromium.org/downloads) in your PATH 
 
 ## Usage
 First, copy sample.cfg to credentials.cfg 
@@ -21,6 +21,16 @@ Next, run
  - [selenium](https://selenium-python.readthedocs.io/) 
  - [caldav](https://pythonhosted.org/caldav/)
  - [ics](https://icspy.readthedocs.io/)
+ 
+ More important steps
+ - Chromedriver is detected by the site as a bot and so logins will fail.  
+ - According to [this](https://stackoverflow.com/questions/33225947/can-a-website-detect-when-you-are-using-selenium-with-chromedriver_) StackOverflow post, there are some javascript variables sites use to detect web drivers like chromedriver
+ - So, we need to run 
+    perl -pi -e 's/cdc_/dog_/g' /path/to/chromedriver
+    - This just renames some variables so that the site doesn't know we're using a web driver.
+    - This repository contains a "patched" chromedriver for macOS
+
+ 
 ## To-Dos (more of a wishlist, probably will not maintain this)
  - Replace ics with icalendar, to support timezones properly
  
