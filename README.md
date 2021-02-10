@@ -37,7 +37,8 @@ Next, run
  - Replace ics with icalendar, to support timezones properly
  
  ~~- Implement the WebDriverWait to wait on elements to show up instead of guessing how long the pages take to generate (currently after each submit we wait 20 seconds and usually this is too long)~~
+ 
 ~~- Since webdriver works the same with different browsers, add a choice of browser in config file
-	 ~~- if that's done, need to get it working in Chrome
- ~~- clean up/speed up code.  It's pretty ugly but it works
+  ~ if that's done, need to get it working in Chrome
+ ~- clean up/speed up code.  It's pretty ugly but it works
  ~ Before adding a shift, check the calendar to make sure there's not already a "work" shift there.  As it stands, it will just add a second shift even if there's already one there~~
