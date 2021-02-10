@@ -37,14 +37,10 @@ calendars = principal.calendars()
 #calendar = calendars[calname]
 calendar = calendars[0]
 for i in calendars:
-#    print(i.get_properties(props=[dav.Href()]))
     if calname in i.get_properties(props=[dav.Href()])["{DAV:}href"]:
         calendar = i
-#        print(calendar)
-        print("FOUND")
         break
-#    print(i.get_properties(props=[dav.Href()]))
-print(calendar)
+#print(calendar)
 class Shift:
 
     def __init__(self, day, date, position, start_time, end_time):
