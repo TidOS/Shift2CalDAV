@@ -85,7 +85,7 @@ class Shift:
         #print(event)
 
 ##############################
-#####    FIREFOX STUFF   #####
+#####    CHROME  STUFF   #####
 ##############################
 
 if config['options']['headless'] == "yes":
