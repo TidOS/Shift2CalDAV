@@ -23,14 +23,28 @@ from dateutil import tz
 config = configparser.ConfigParser()
 config.read("credentials.cfg")
 davurl = config['url']['address']
+davname = config['url']['user']
+davpass = config['url']['pass']
+calname = config['url']['name']
 #print("using " + davurl)
 #acquire calendar info
-client = caldav.DAVClient(davurl)
-principal = client.principal()
-calendars = principal.calendars()
-#we are currently providing the exact calendar to use in our URL
-calendar = calendars[0]
 
+client = caldav.DAVClient(url=davurl, username=davname, password=davpass)
+#print(client)
+principal = client.principal()
+
+calendars = principal.calendars()
+#calendar = calendars[calname]
+calendar = calendars[0]
+for i in calendars:
+#    print(i.get_properties(props=[dav.Href()]))
+    if calname in i.get_properties(props=[dav.Href()])["{DAV:}href"]:
+        calendar = i
+#        print(calendar)
+        print("FOUND")
+        break
+#    print(i.get_properties(props=[dav.Href()]))
+print(calendar)
 class Shift:
 
     def __init__(self, day, date, position, start_time, end_time):
@@ -69,7 +83,6 @@ class Shift:
         #we are just using 'local' time, no time zone and ics module only supports UTC
         calendar.add_event(str(ics).replace("Z",""))
         #print(event)
-
 
 ##############################
 #####    FIREFOX STUFF   #####
