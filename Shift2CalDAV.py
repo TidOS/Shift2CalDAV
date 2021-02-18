@@ -195,6 +195,8 @@ if config['options']['nextweek'] == "yes":
                                               + str(x) + "]")
         if not shift.text.strip():
             continue
+        elif "Unpaid" in shift.text.strip():
+            continue
         shift_info = (days.text + '\n' + shift.text)
         #print(shift_info)
         workday = Shift(shift_info.splitlines()[0],
