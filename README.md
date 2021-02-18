@@ -38,3 +38,4 @@ Next, run
  - Fix case where year rolls into next year
  - Fix case where there is a workcenter change or second shift, currently only the first shift shows
  - Handle days that previously had shifts but now do not
+ - Currently headless mode not working - fails at finding security q+a button - Chrome/chromedriver 88
