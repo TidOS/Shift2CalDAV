@@ -1,14 +1,10 @@
 #!/usr/bin/env python
-#import PySimpleGUI as sg
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-
-
 
 import time
 import datetime
@@ -19,15 +15,12 @@ import configparser
 from ics import Calendar, Event
 from dateutil import tz
 
-#sg.Popup('Hello From PySimpleGUI!', 'This is the shortest GUI program ever!')
 config = configparser.ConfigParser()
 config.read("credentials.cfg")
 davurl = config['url']['address']
 davname = config['url']['user']
 davpass = config['url']['pass']
 calname = config['url']['name']
-#print("using " + davurl)
-#acquire calendar info
 
 client = caldav.DAVClient(url=davurl, username=davname, password=davpass)
 #print(client)
