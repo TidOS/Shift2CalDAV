@@ -15,6 +15,8 @@ import configparser
 from ics import Calendar, Event
 from dateutil import tz
 
+
+#get calendar specific info from credentials.cfg
 config = configparser.ConfigParser()
 config.read("credentials.cfg")
 davurl = config['url']['address']
@@ -22,18 +24,22 @@ davname = config['url']['user']
 davpass = config['url']['pass']
 calname = config['url']['name']
 
-client = caldav.DAVClient(url=davurl, username=davname, password=davpass)
-#print(client)
-principal = client.principal()
 
+client = caldav.DAVClient(url=davurl, username=davname, password=davpass)
+#a principal holds calendars, there can be multiple
+principal = client.principal()
 calendars = principal.calendars()
-#calendar = calendars[calname]
 calendar = calendars[0]
+#since there can be multiple calendars, we need the one that is matched
+#in our URL from credentials.cfg
+#note:  if correct calendar is not found, the first calendar from the 
+#principal will be used.  This may be undesirable!
 for i in calendars:
     if calname in i.get_properties(props=[dav.Href()])["{DAV:}href"]:
         calendar = i
         break
-#print(calendar)
+    
+#
 class Shift:
 
     def __init__(self, day, date, position, start_time, end_time):
@@ -71,7 +77,6 @@ class Shift:
         #we need to get rid of the Z in the times because it implies we're using UTC
         #we are just using 'local' time, no time zone and ics module only supports UTC
         calendar.add_event(str(ics).replace("Z",""))
-        #print(event)
 
 ##############################
 #####    CHROME  STUFF   #####
