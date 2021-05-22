@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+import datetime
+from datetime import datetime, date, timedelta
+import configparser
+import time
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -6,14 +12,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-import time
-import datetime
-from datetime import datetime, date, timedelta
 import caldav
-from caldav.elements import dav, cdav
-import configparser
+
+#from caldav.elements import dav, cdav
+#pylint suggest cdav unused
+from caldav.elements import dav
+
 from ics import Calendar, Event
-from dateutil import tz
+
+#unused
+#from dateutil import tz
 
 
 #get calendar specific info from credentials.cfg
@@ -32,22 +40,22 @@ calendars = principal.calendars()
 calendar = calendars[0]
 #since there can be multiple calendars, we need the one that is matched
 #in our URL from credentials.cfg
-#note:  if correct calendar is not found, the first calendar from the 
+#note:  if correct calendar is not found, the first calendar from the
 #principal will be used.  This may be undesirable!
 for i in calendars:
     if calname in i.get_properties(props=[dav.Href()])["{DAV:}href"]:
         calendar = i
         break
-    
+
 #
 class Shift:
-
+    ''' A Shift has a start and end date and can add events to the global calendar'''
     def __init__(self, day, date, position, start_time, end_time):
         self.day = day
         self.date = date
         self.position = position
-        self.startTime = datetime.strptime(start_time, "%I:%M%p").strftime("%H:%M:%S")
-        self.endTime = datetime.strptime(end_time, "%I:%M%p").strftime("%H:%M:%S")
+        self.start_time = datetime.strptime(start_time, "%I:%M%p").strftime("%H:%M:%S")
+        self.end_time = datetime.strptime(end_time, "%I:%M%p").strftime("%H:%M:%S")
 
     def make_event(self):
 
@@ -61,18 +69,27 @@ class Shift:
         #print("looking in calendar for date: " + self.date)
 
         try:
-            todayshift = calendar.date_search(datetime(int(split[0]), int(split[1]), int(split[2])), datetime(int(split[0]), int(split[1]), int(split[2])+1))
+            todayshift = calendar.date_search(datetime(int(split[0]),
+            int(split[1]),
+            int(split[2])),
+            datetime(int(split[0]),
+            int(split[1]),
+            int(split[2])+1))
         except ValueError:
             print("it's next month for next day.")
-            todayshift = calendar.date_search(datetime(int(split[0]), int(split[1]), int(split[2])), datetime(int(split[0]), int(split[1])+1, 1))
+            todayshift = calendar.date_search(datetime(int(split[0]),
+            int(split[1]),
+            int(split[2])),
+            datetime(int(split[0]),
+            int(split[1])+1, 1))
         for e in todayshift:
             e.load()
             if "<SUMMARY{}work" in str(e.instance.vevent):
                 #print("deleting existing shift")
                 e.delete()
         event.name = "work - " + self.position
-        event.begin = self.date + " " + self.startTime
-        event.end = self.date + " " + self.endTime
+        event.begin = self.date + " " + self.start_time
+        event.end = self.date + " " + self.end_time
         ics.events.add(event)
         #we need to get rid of the Z in the times because it implies we're using UTC
         #we are just using 'local' time, no time zone and ics module only supports UTC
@@ -163,17 +180,21 @@ table = browser.find_element_by_class_name("request_table_bordered")
 #current week
 if config['options']['thisweek'] == "yes":
     for x in range(2, 9):
-        # this loop cycles through the week and assembles your shift information and creates the event
-        days = browser.find_element_by_xpath("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[1]/td["
-                                             + str(x) + "]")
-        shift = browser.find_element_by_xpath("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[3]/td["
-                                              + str(x) + "]")
+        # this loop cycles through the week and assembles your shift information 
+        # and creates the event
+        days = browser.find_element_by_xpath\
+            ("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[1]/td["
+            + str(x) + "]")
+        shift = browser.find_element_by_xpath\
+            ("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[3]/td["
+            + str(x) + "]")
         if not shift.text.strip():
             continue
         shift_info = (days.text + '\n' + shift.text)
         #print(shift_info)
         workday = Shift(shift_info.splitlines()[0],
-                        datetime.strptime(shift_info.splitlines()[1], "%m/%d/%y").strftime("%Y-%m-%d"),
+                        datetime.strptime(shift_info.splitlines()[1],
+                        "%m/%d/%y").strftime("%Y-%m-%d"),
                         shift_info.splitlines()[2],
                         shift_info.splitlines()[3].split('-')[0].strip(),
                         shift_info.splitlines()[3].split('-')[1].strip())
@@ -182,23 +203,26 @@ if config['options']['thisweek'] == "yes":
 
 #next week
 if config['options']['nextweek'] == "yes":
-    next = browser.find_element_by_xpath("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[2]/tbody/tr[1]/td/div/a[2]")
-    next.click()
+    nextButton = browser.find_element_by_xpath\
+        ("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[2]/tbody/tr[1]/td/div/a[2]")
+    nextButton.click()
 
     for x in range(2, 9):
-        # this loop cycles through the week and assembles your shift information and creates the event
-        days = browser.find_element_by_xpath("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[1]/td["
-                                             + str(x) + "]")
-        shift = browser.find_element_by_xpath("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[3]/td["
-                                              + str(x) + "]")
-        if not shift.text.strip():
-            continue
-        elif "Unpaid" in shift.text.strip():
+        # this loop cycles through the week and assembles your shift information
+        # and creates the event
+        days = browser.find_element_by_xpath\
+            ("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[1]/td["
+            + str(x) + "]")
+        shift = browser.find_element_by_xpath\
+            ("//*[@id='page_content']/table[1]/tbody/tr[1]/td/table[3]/tbody/tr[3]/td["
+            + str(x) + "]")
+        if not shift.text.strip() or "Unpaid" in shift.text.strip():
             continue
         shift_info = (days.text + '\n' + shift.text)
         #print(shift_info)
         workday = Shift(shift_info.splitlines()[0],
-                        datetime.strptime(shift_info.splitlines()[1], "%m/%d/%y").strftime("%Y-%m-%d"),
+                        datetime.strptime(shift_info.splitlines()[1],
+                        "%m/%d/%y").strftime("%Y-%m-%d"),
                         shift_info.splitlines()[2],
                         shift_info.splitlines()[3].split('-')[0].strip(),
                         shift_info.splitlines()[3].split('-')[1].strip())
