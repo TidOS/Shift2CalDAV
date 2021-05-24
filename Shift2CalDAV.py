@@ -47,7 +47,7 @@ for i in calendars:
         calendar = i
         break
 
-#
+
 class Shift:
     ''' A Shift has a start and end date and can add events to the global calendar'''
     def __init__(self, day, date, position, start_time, end_time):
