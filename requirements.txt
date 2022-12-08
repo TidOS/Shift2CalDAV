@@ -1,6 +1,6 @@
 ﻿arrow==0.14.7
 caldav==0.6.2
-certifi==2019.11.28
+certifi==2022.12.7
 chardet==3.0.4
 ics==0.6
 idna==2.9
